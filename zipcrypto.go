@@ -1,7 +1,6 @@
 package zip
 
 import (
-	"bytes"
 	"hash/crc32"
 	"io"
 )
@@ -62,18 +61,45 @@ func (z *ZipCrypto) Decrypt(chiper []byte) []byte {
 	return plain
 }
 
+type ZipCryptoReader struct {
+	ZipCrypto
+	upstream io.Reader
+}
+
+func NewZipCryptoReader(upstream io.Reader, passphrase []byte) *ZipCryptoReader {
+	z := &ZipCryptoReader{
+		ZipCrypto: ZipCrypto{
+			password: passphrase,
+		},
+		upstream: upstream,
+	}
+	z.init()
+
+	// skip first 12 bytes
+	buf := make([]byte, 12)
+	z.Read(buf)
+
+	return z
+}
+
+func (z *ZipCryptoReader) Read(p []byte) (n int, err error) {
+	n, err = z.upstream.Read(p)
+	for i := 0; i < n; i++ {
+		c := p[i]
+		v := c ^ z.magicByte()
+		z.updateKeys(v)
+		p[i] = v
+	}
+	return n, err
+}
+
 func crc32update(pCrc32 uint32, bval byte) uint32 {
 	return crc32.IEEETable[(pCrc32^uint32(bval))&0xff] ^ (pCrc32 >> 8)
 }
 
-func ZipCryptoDecryptor(r *io.SectionReader, password []byte) (*io.SectionReader, error) {
-	z := NewZipCrypto(password)
-	b := make([]byte, r.Size())
-
-	r.Read(b)
-
-	m := z.Decrypt(b)
-	return io.NewSectionReader(bytes.NewReader(m), 12, int64(len(m))), nil
+func ZipCryptoDecryptor(r *io.SectionReader, password []byte) (io.Reader, error) {
+	z := NewZipCryptoReader(r, password)
+	return z, nil
 }
 
 type zipCryptoWriter struct {

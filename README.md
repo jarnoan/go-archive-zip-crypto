@@ -1,7 +1,7 @@
 # Go `archive/zip` plus encryption support
 
-[![GoDoc](https://godoc.org/github.com/hillu/go-archive-zip-crypto?status.svg)](https://godoc.org/github.com/hillu/go-archive-zip-crypto)
-[![Go Report Card](https://goreportcard.com/badge/github.com/hillu/go-archive-zip-crypto)](https://goreportcard.com/report/github.com/hillu/go-archive-zip-crypto)
+[![GoDoc](https://godoc.org/github.com/jarnoan/go-archive-zip-crypto?status.svg)](https://godoc.org/github.com/jarnoan/go-archive-zip-crypto)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jarnoan/go-archive-zip-crypto)](https://goreportcard.com/report/github.com/jarnoan/go-archive-zip-crypto)
 
 This is a fork of the `archive/zip` package from the Go standard
 library which adds support for both the legacy
